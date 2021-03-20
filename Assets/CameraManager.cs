@@ -59,7 +59,6 @@ public class CameraManager : MonoBehaviour
                 SetActiveCamera("Player Camera");
             }
         }
-        
     }
 
     private void DisableAllCameras()
