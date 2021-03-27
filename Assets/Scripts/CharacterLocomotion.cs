@@ -13,6 +13,15 @@ public class CharacterLocomotion : MonoBehaviour
     
     
     private bool grounded = false;
+
+
+    private void Awake()
+    {
+
+
+    }
+    
+    
     
 
 

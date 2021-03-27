@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using Cinemachine;
 using UnityEngine;
 
@@ -16,8 +17,22 @@ public class CameraManager : MonoBehaviour
 
     // public List<PlayerScore> _playerScores = new List<PlayerScore>();
     // private Dictionary<string, int> scores = new Dictionary<string, int>();
-    
-    
+
+
+    public static CameraManager Instance => _instance;
+
+    private static CameraManager _instance;
+
+    private void Awake()
+    {
+        if (ReferenceEquals(_instance, null))
+        {
+            Destroy(this.gameObject);
+        }
+
+        _instance = this;
+    }
+
     void Start()
     {
         foreach (var camera in _cameraList)
