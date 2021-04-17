@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Target
   - Checkpoint
+  - Pickup
+  - DropPoint
   layers:
   - Default
   - TransparentFX
