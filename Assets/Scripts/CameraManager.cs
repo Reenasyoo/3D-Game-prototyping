@@ -25,7 +25,7 @@ public class CameraManager : MonoBehaviour
 
     private void Awake()
     {
-        if (ReferenceEquals(_instance, null))
+        if (!ReferenceEquals(_instance, null))
         {
             Destroy(this.gameObject);
         }

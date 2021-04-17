@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CharacterLocomotion : MonoBehaviour
@@ -8,43 +9,104 @@ public class CharacterLocomotion : MonoBehaviour
     [SerializeField] private CharacterAnimationController animationController = null;
     [SerializeField] private PlayerSettings settings;
 
+    private List<PickupObject> pickedUpObjects = new List<PickupObject>();
+    private GameObject targetObject;
+    private Transform targetPlace;
+    private int targetPlaceIndex;
+    private bool canPickup = false;
+    private bool canDrop = false;
+    private bool oneAction = true;
+
 
     private float sprintSpeed = 2f;
-    
-    
     private bool grounded = false;
+    
+    
 
-
-    private void Awake()
+    private void Pickup()
     {
+        var temp = targetObject.GetComponent<PickupObject>();;
+        var pickupObj = temp;
 
-
+        if (pickupObj.canPickup)
+        {
+            pickupObj.canPickup = false;
+            temp.gameObject.SetActive(false);
+            pickedUpObjects.Add(temp);    
+        }
     }
-    
-    
-    
 
+    private bool HasObject(int index)
+    {
+        var has = false;
+        
+        foreach (var pickedUpObject in pickedUpObjects)
+        {
+            if (pickedUpObject.index == index)
+            {
+                has = true;
+            }
+        }
+
+        return has;
+    }
+
+    private void Drop()
+    {
+        if(pickedUpObjects.Count <= 0) return;
+
+        if (HasObject(targetPlaceIndex))
+        {
+            var temp = targetPlace.GetChild(0);
+            temp.gameObject.SetActive(true);
+        
+            pickedUpObjects.Remove(pickedUpObjects[0]);    
+        }
+    }
 
     private void Update()
     {
+        if (canPickup)
+        {
+            if (Input.GetKey(KeyCode.E) && oneAction)
+            {
+                
+                canPickup = false;
+                oneAction = false;
+                Pickup();
+            }
+        }
+        
+        if (canDrop)
+        {
+            if (Input.GetKey(KeyCode.E) && oneAction)
+            {
+                oneAction = false;
+                canDrop = false;
+                Drop();
+                
+            }
+        }
+        
+        
         var inputDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        
-        
-            if (Input.GetKey(KeyCode.LeftShift))
-            {
-                animationController.SetForwardVelocity(inputDirection.z * sprintSpeed);        
-            }
-            else
-            {
-                {
-                    animationController.SetForwardVelocity(inputDirection.z);
-                }
-            }
-            
-            animationController.SetSideVelocity(inputDirection.x);
 
 
-            if(_rigidbody.velocity.y.Equals(0f))
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            animationController.SetForwardVelocity(inputDirection.z * sprintSpeed);
+        }
+        else
+        {
+            {
+                animationController.SetForwardVelocity(inputDirection.z);
+            }
+        }
+
+        animationController.SetSideVelocity(inputDirection.x);
+
+
+        if (_rigidbody.velocity.y.Equals(0f))
         {
             grounded = true;
         }
@@ -56,7 +118,7 @@ public class CharacterLocomotion : MonoBehaviour
         if (grounded)
         {
             var direction = transform.TransformDirection(inputDirection);
-        
+
             direction *= settings.moveSpeed;
 
             _rigidbody.velocity = direction;
@@ -103,11 +165,42 @@ public class CharacterLocomotion : MonoBehaviour
         targetRotation.z = 0;
 
         transform.rotation = targetRotation;
-
     }
 
     private bool Aprox(float a, float b, float tolerance)
     {
         return (Mathf.Abs(a - b) < tolerance);
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag(("Pickup")))
+        {
+            canPickup = true;
+            targetObject = other.gameObject;
+        }
+
+        if (other.CompareTag("DropPoint"))
+        {
+            targetPlace = other.transform;
+            targetPlaceIndex = other.gameObject.GetComponent<DropPlace>().index;
+            canDrop = true;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag(("Pickup")))
+        {
+            canPickup = false;
+            targetObject = null;
+            oneAction = true;
+        }
+        
+        if (other.CompareTag("DropPoint"))
+        {
+            canDrop = false;
+            oneAction = true;
+        }
     }
 }

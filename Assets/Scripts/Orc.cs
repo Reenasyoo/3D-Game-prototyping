@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Orc : EnemyBase
 {
-    public override void Attack()
+    protected override void Attack()
     {
         print("Orc attacks");
     }
